@@ -9,13 +9,14 @@ import com.habitrpg.android.habitica.ui.activities.AboutActivity;
 import com.habitrpg.android.habitica.ui.activities.MainActivity;
 import com.habitrpg.android.habitica.R;
 import com.habitrpg.android.habitica.ui.activities.PrefsActivity;
-import com.habitrpg.android.habitica.ui.fragments.AvatarOverviewFragment;
-import com.habitrpg.android.habitica.ui.fragments.BaseFragment;
+import com.habitrpg.android.habitica.ui.fragments.inventory.customization.AvatarOverviewFragment;
+import com.habitrpg.android.habitica.ui.fragments.BaseMainFragment;
+import com.habitrpg.android.habitica.ui.fragments.faq.FAQOverviewFragment;
 import com.habitrpg.android.habitica.ui.fragments.GemsPurchaseFragment;
-import com.habitrpg.android.habitica.ui.fragments.PartyFragment;
+import com.habitrpg.android.habitica.ui.fragments.social.party.PartyFragment;
 import com.habitrpg.android.habitica.ui.fragments.SkillsFragment;
-import com.habitrpg.android.habitica.ui.fragments.TasksFragment;
-import com.habitrpg.android.habitica.ui.fragments.TavernFragment;
+import com.habitrpg.android.habitica.ui.fragments.tasks.TasksFragment;
+import com.habitrpg.android.habitica.ui.fragments.social.TavernFragment;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -39,7 +40,8 @@ public class MainDrawerBuilder {
     public static final int SIDEBAR_STABLE = 7;
     public static final int SIDEBAR_PURCHASE = 8;
     public static final int SIDEBAR_SETTINGS = 9;
-    public static final int SIDEBAR_ABOUT = 10;
+    public static final int SIDEBAR_HELP = 10;
+    public static final int SIDEBAR_ABOUT = 11;
 
 
 
@@ -89,6 +91,7 @@ public class MainDrawerBuilder {
                         new DividerDrawerItem(),
                         //new SecondaryDrawerItem().withName(activity.getString(R.string.sidebar_news)),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_settings)).withIdentifier(SIDEBAR_SETTINGS),
+                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_help)).withIdentifier(SIDEBAR_HELP),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_about)).withIdentifier(SIDEBAR_ABOUT)
 
                 )
@@ -96,7 +99,7 @@ public class MainDrawerBuilder {
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        BaseFragment fragment = null;
+                        BaseMainFragment fragment = null;
                         Class newActivityClass = null;
 
                         switch (drawerItem.getIdentifier()) {
@@ -126,6 +129,10 @@ public class MainDrawerBuilder {
                             }
                             case SIDEBAR_SETTINGS: {
                                 newActivityClass = PrefsActivity.class;
+                                break;
+                            }
+                            case SIDEBAR_HELP: {
+                                fragment = new FAQOverviewFragment();
                                 break;
                             }
                             case SIDEBAR_ABOUT: {

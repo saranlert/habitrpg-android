@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.amplitude.api.Amplitude;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -146,6 +147,16 @@ public class LoginActivity extends AppCompatActivity
 		mApiHelper = new APIHelper(hc);
 
         this.isRegistering = true;
+
+        JSONObject eventProperties = new JSONObject();
+        try {
+            eventProperties.put("eventAction", "navigate");
+            eventProperties.put("eventCategory", "navigation");
+            eventProperties.put("hitType", "pageview");
+            eventProperties.put("page", this.getClass().getSimpleName());
+        } catch (JSONException exception) {
+        }
+        Amplitude.getInstance().logEvent("navigate", eventProperties);
     }
 
 	private void resetLayout() {
@@ -218,6 +229,13 @@ public class LoginActivity extends AppCompatActivity
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
 		finish();
+    }
+
+    private void startSetupActivity() {
+        Intent intent = new Intent(LoginActivity.this, SetupActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void toggleRegistering() {
@@ -323,7 +341,19 @@ public class LoginActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.startMainActivity();
+        if (this.isRegistering) {
+            this.startSetupActivity();
+        } else {
+            JSONObject eventProperties = new JSONObject();
+            try {
+                eventProperties.put("eventAction", "lofin");
+                eventProperties.put("eventCategory", "behaviour");
+                eventProperties.put("hitType", "event");
+            } catch (JSONException exception) {
+            }
+            Amplitude.getInstance().logEvent("login", eventProperties);
+            this.startMainActivity();
+        }
     }
 
     private void saveTokens(String api, String user) throws Exception {

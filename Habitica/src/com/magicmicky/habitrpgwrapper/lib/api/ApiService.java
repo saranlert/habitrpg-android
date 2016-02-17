@@ -1,5 +1,6 @@
 package com.magicmicky.habitrpgwrapper.lib.api;
 
+import com.habitrpg.android.habitica.ui.activities.SetupActivity;
 import com.magicmicky.habitrpgwrapper.lib.models.ChatMessage;
 import com.magicmicky.habitrpgwrapper.lib.models.ContentResult;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
@@ -44,7 +45,7 @@ public interface ApiService {
     void getUser(Callback<HabitRPGUser> habitRPGUserCallback);
 
     @PUT("/user/")
-    void updateUser(@Body Map<String, String> updateDictionary, Callback<HabitRPGUser> habitRPGUserCallback);
+    void updateUser(@Body Map<String, Object> updateDictionary, Callback<HabitRPGUser> habitRPGUserCallback);
 
     @GET("/user/inventory/buy")
     void getInventoryBuyableGear(Callback<List<ItemData>> buyableGearCallback);
@@ -130,6 +131,8 @@ public interface ApiService {
     void flagMessage(@Path("gid") String groupId, @Path("mid") String mid, Callback<Void> cb);
 
     @POST("/groups/{gid}/chat/seen")
-    void seenMessage(@Path("gid") String groupId, Callback<Void> cb);
+    void seenMessages(@Path("gid") String groupId, Callback<String> cb);
 
+    @POST("/user/batch-update")
+    void batchOperation(@Body List<Map<String,Object>> operations, Callback<HabitRPGUser> cb);
 }

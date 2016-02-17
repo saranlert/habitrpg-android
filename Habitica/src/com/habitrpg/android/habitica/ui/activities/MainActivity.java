@@ -25,11 +25,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.amplitude.api.Amplitude;
 import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.HabiticaApplication;
 import com.habitrpg.android.habitica.HostConfig;
 import com.habitrpg.android.habitica.NotificationPublisher;
 import com.habitrpg.android.habitica.R;
+import com.habitrpg.android.habitica.events.DisplayTutorialEvent;
+import com.habitrpg.android.habitica.ui.TutorialView;
 import com.habitrpg.android.habitica.callbacks.HabitRPGUserCallback;
 import com.habitrpg.android.habitica.callbacks.TaskScoringCallback;
 import com.habitrpg.android.habitica.callbacks.UnlockCallback;
@@ -45,7 +48,7 @@ import com.habitrpg.android.habitica.events.commands.UpdateUserCommand;
 import com.habitrpg.android.habitica.ui.AvatarWithBarsViewModel;
 import com.habitrpg.android.habitica.ui.MainDrawerBuilder;
 import com.habitrpg.android.habitica.ui.UiUtils;
-import com.habitrpg.android.habitica.ui.fragments.BaseFragment;
+import com.habitrpg.android.habitica.ui.fragments.BaseMainFragment;
 import com.habitrpg.android.habitica.ui.fragments.GemsPurchaseFragment;
 import com.habitrpg.android.habitica.userpicture.UserPicture;
 import com.habitrpg.android.habitica.userpicture.UserPictureRunnable;
@@ -53,6 +56,7 @@ import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.SuppressedModals;
 import com.magicmicky.habitrpgwrapper.lib.models.TaskDirection;
 import com.magicmicky.habitrpgwrapper.lib.models.TaskDirectionData;
+import com.magicmicky.habitrpgwrapper.lib.models.TutorialStep;
 import com.magicmicky.habitrpgwrapper.lib.models.tasks.ChecklistItem;
 import com.magicmicky.habitrpgwrapper.lib.models.tasks.Days;
 import com.magicmicky.habitrpgwrapper.lib.models.tasks.Task;
@@ -70,6 +74,8 @@ import com.raizlabs.android.dbflow.sql.language.From;
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.language.Where;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.solovyev.android.checkout.ActivityCheckout;
 import org.solovyev.android.checkout.Checkout;
 
@@ -94,12 +100,13 @@ import static com.habitrpg.android.habitica.ui.UiUtils.showSnackbar;
 
 public class MainActivity extends BaseActivity implements HabitRPGUserCallback.OnUserReceived,
         TaskScoringCallback.OnTaskScored,
-        GemsPurchaseFragment.Listener {
+        GemsPurchaseFragment.Listener, TutorialView.OnTutorialReaction {
 
     @Bind(R.id.floating_menu_wrapper) FrameLayout floatingMenuWrapper;
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.detail_tabs) TabLayout detail_tabs;
     @Bind(R.id.avatar_with_bars) View avatar_with_bars;
+    @Bind(R.id.overlayFrameLayout) FrameLayout overlayFrameLayout;
 
     // Checkout needs to be in the Activity..
     public ActivityCheckout checkout = null;
@@ -107,7 +114,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     protected HostConfig hostConfig;
     protected HabitRPGUser user;
     private AccountHeader accountHeader;
-    private BaseFragment activeFragment;
+    private BaseMainFragment activeFragment;
     private AvatarWithBarsViewModel avatarInHeader;
     private APIHelper mAPIHelper;
     private MaterialDialog faintDialog;
@@ -116,6 +123,8 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     private UserPicture dialogUserPicture;
 
     private Date lastSync;
+
+    private TutorialView activeTutorialView;
 
     @Override
     protected int getLayoutResId() {
@@ -174,6 +183,14 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
             }
         }
 
+        //after the activity has been stopped and is thereafter resumed,
+        //a state can arise in which the active fragment no longer has a
+        //reference to the tabLayout (and all its adapters are null).
+        //Recreate the fragment as a result.
+        if (activeFragment != null && activeFragment.tabLayout == null){
+            activeFragment = null;
+            drawer.setSelectionAtPosition(1);
+        }
     }
 
     private void setupCheckout() {
@@ -200,7 +217,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         }
     }
 
-    public void displayFragment(BaseFragment fragment) {
+    public void displayFragment(BaseMainFragment fragment) {
         if (this.activeFragment != null && fragment.getClass() == this.activeFragment.getClass()) {
             return;
         }
@@ -213,11 +230,11 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         fragment.setFloatingMenuWrapper(floatingMenuWrapper);
 
         if (getSupportFragmentManager().getFragments() == null) {
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commitAllowingStateLoss();
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
-            transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
+            transaction.replace(R.id.fragment_container, fragment).addToBackStack(null).commitAllowingStateLoss();
         }
     }
 
@@ -225,9 +242,6 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         @Override
         public void onResultReceived(HabitRPGUser habitRPGUser) {
             MainActivity.this.user = habitRPGUser;
-            if (activeFragment == null) {
-                MainActivity.this.drawer.setSelectionAtPosition(1);
-            }
             MainActivity.this.setUserData(true);
         }
 
@@ -248,7 +262,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
             TimeZone mTimeZone = mCalendar.getTimeZone();
             long offset = -TimeUnit.MINUTES.convert(mTimeZone.getRawOffset(), TimeUnit.MILLISECONDS);
             if (offset != user.getPreferences().getTimezoneOffset()) {
-                Map<String, String> updateData = new HashMap<String, String>();
+                Map<String, Object> updateData = new HashMap<>();
                 updateData.put("preferences.timezoneOffset", String.valueOf(offset));
                 mAPIHelper.apiService.updateUser(updateData, new HabitRPGUserCallback(this));
             }
@@ -260,6 +274,8 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
                     saveLoginInformation();
                     if (activeFragment != null) {
                         activeFragment.updateUserData(user);
+                    } else {
+                        drawer.setSelectionAtPosition(1);
                     }
                 }
             });
@@ -459,12 +475,15 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     public void onUserFail() {
     }
 
-    public void setActiveFragment(BaseFragment fragment) {
+    public void setActiveFragment(BaseMainFragment fragment) {
         this.activeFragment = fragment;
         this.drawer.setSelectionAtPosition(this.activeFragment.fragmentSidebarPosition, false);
     }
 
     public void onBackPressed() {
+        if (this.activeTutorialView != null) {
+            this.removeActiveTutorialView();
+        }
         if (drawer.isDrawerOpen()) {
             drawer.closeDrawer();
         } else if (drawer.getDrawerLayout().isDrawerOpen(Gravity.RIGHT)) {
@@ -592,6 +611,10 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
 
     public void onEvent(OpenGemPurchaseFragmentCommand cmd) {
         drawer.setSelection(MainDrawerBuilder.SIDEBAR_PURCHASE);
+    }
+
+    public void onEvent(DisplayTutorialEvent tutorialEvent) {
+        this.displayTutorialStep(tutorialEvent.step, tutorialEvent.tutorialText);
     }
 
     // endregion
@@ -783,6 +806,63 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
                 AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
                 alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger_time, AlarmManager.INTERVAL_DAY, pendingIntent);
             }
+        }
+    }
+
+    private void displayTutorialStep(TutorialStep step, String text) {
+        TutorialView view = new TutorialView(this, step, this);
+        view.setTutorialText(text);
+        view.onReaction = this;
+        this.overlayFrameLayout.addView(view);
+        this.activeTutorialView = view;
+
+        JSONObject eventProperties = new JSONObject();
+        try {
+            eventProperties.put("eventAction", "tutorial");
+            eventProperties.put("eventCategory", "behaviour");
+            eventProperties.put("hitType", "event");
+            eventProperties.put("eventLabel", step.getIdentifier()+"-android");
+            eventProperties.put("eventValue", step.getIdentifier());
+            eventProperties.put("complete", false);
+        } catch (JSONException exception) {
+        }
+        Amplitude.getInstance().logEvent("tutorial", eventProperties);
+    }
+
+    @Override
+    public void onTutorialCompleted(TutorialStep step) {
+        String path = "flags.tutorial." + step.getTutorialGroup() + "." + step.getIdentifier();
+        Map<String, Object> updateData = new HashMap<>();
+        updateData.put(path, true);
+        mAPIHelper.apiService.updateUser(updateData, new HabitRPGUserCallback(this));
+        this.overlayFrameLayout.removeView(this.activeTutorialView);
+        this.removeActiveTutorialView();
+
+        JSONObject eventProperties = new JSONObject();
+        try {
+            eventProperties.put("eventAction", "tutorial");
+            eventProperties.put("eventCategory", "behaviour");
+            eventProperties.put("hitType", "event");
+            eventProperties.put("eventLabel", step.getIdentifier()+"-android");
+            eventProperties.put("eventValue", step.getIdentifier());
+            eventProperties.put("complete", true);
+        } catch (JSONException exception) {
+        }
+        Amplitude.getInstance().logEvent("tutorial", eventProperties);
+    }
+
+    @Override
+    public void onTutorialDeferred(TutorialStep step) {
+        step.setDisplayedOn(new Date());
+        step.save();
+
+        this.removeActiveTutorialView();
+    }
+
+    private void removeActiveTutorialView() {
+        if (this.activeTutorialView != null) {
+            this.overlayFrameLayout.removeView(this.activeTutorialView);
+            this.activeTutorialView = null;
         }
     }
 }
