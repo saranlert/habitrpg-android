@@ -19,6 +19,18 @@ import java.util.List;
  */
 @Table(databaseName = HabitDatabase.NAME)
 public class Flags extends BaseModel {
+//    cardReceived: false
+//    communityGuidelinesAccepted: false
+//    cronCount: 2
+//    customizationsNotification: true
+//    lastWeeklyRecap: "2016-01-30T10:01:40.947Z"
+//    levelDrops: {}
+//    recaptureEmailsPhase: 0
+//    rewrite: true
+//    tour: {intro: -2, classes: -1, stats: -1, tavern: -1, party: -2, guilds: -1, challenges: -1, market: -1,…}
+//    warnedLowHealth: false
+//    weeklyRecapEmailsPhase: 0
+
 
     @Column
     @PrimaryKey
