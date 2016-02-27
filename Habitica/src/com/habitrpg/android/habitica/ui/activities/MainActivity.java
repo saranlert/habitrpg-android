@@ -63,6 +63,7 @@ import com.magicmicky.habitrpgwrapper.lib.models.tasks.Task;
 import com.magicmicky.habitrpgwrapper.lib.models.tasks.TaskTag;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
@@ -113,6 +114,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     // Checkout needs to be in the Activity..
     public ActivityCheckout checkout = null;
     public Drawer drawer;
+    public Drawer taskFilterDrawer;
     protected HostConfig hostConfig;
     protected HabitRPGUser user;
     private AccountHeader accountHeader;
@@ -166,6 +168,11 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         drawer = MainDrawerBuilder.CreateDefaultBuilderSettings(this, toolbar, accountHeader)
                 .build();
         drawer.setSelectionAtPosition(1, false);
+        taskFilterDrawer= new DrawerBuilder()
+                .withActivity(this)
+                .withDrawerGravity(Gravity.END)
+                .withCloseOnClick(false)
+                .append(drawer);
         this.sideUserPicture = new UserPicture(this, true, false);
         this.dialogUserPicture = new UserPicture(this, false, false);
 

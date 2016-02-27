@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
 import com.habitrpg.android.habitica.databinding.FragmentPartyInfoBinding;
+import com.habitrpg.android.habitica.ui.adapter.social.QuestMemberRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
@@ -40,12 +43,12 @@ public class PartyInformationFragment extends Fragment {
     FragmentPartyInfoBinding viewBinding;
     APIHelper mAPIHelper;
     @Bind(R.id.questMemberView)
-    LinearLayout questMemberView;
+    RecyclerView questMemberView;
     private Group group;
     private HabitRPGUser user;
     private boolean registerEventBus;
 
-
+    private QuestMemberRecyclerViewAdapter viewAdapter;
 
     public static PartyInformationFragment newInstance(Group group, HabitRPGUser user, APIHelper mAPIHelper) {
 
@@ -85,7 +88,11 @@ public class PartyInformationFragment extends Fragment {
         } catch (EventBusException ignored) {
 
         }
+
         ButterKnife.bind(this, view);
+        questMemberView.setLayoutManager(new LinearLayoutManager(getContext()));
+        viewAdapter = new QuestMemberRecyclerViewAdapter();
+        questMemberView.setAdapter(viewAdapter);
 
         return view;
     }
@@ -122,40 +129,7 @@ public class PartyInformationFragment extends Fragment {
     }
 
     private void updateQuestMember(Group group) {
-
-        questMemberView.removeAllViewsInLayout();
-        if (group.quest.key == null) return;
-        LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        for (HabitRPGUser member : group.members) {
-            final LinearLayout itemView = (LinearLayout) layoutInflater.inflate(R.layout.party_member_quest, null);
-            TextView questResponse = (TextView) itemView.findViewById(R.id.rsvpneeded);
-            TextView userName = (TextView) itemView.findViewById(R.id.username);
-            if (group.quest.leader.equals(member.getId()))
-                userName.setText("* " + member.getProfile().getName());
-            else
-                userName.setText(member.getProfile().getName());
-
-            if (!group.quest.members.containsKey(member.getId()))
-                continue;
-            Boolean questresponse = group.quest.members.get(member.getId());
-            if (group.quest.active) {
-                questResponse.setText("");
-            } else if (questresponse == null) {
-                questResponse.setText("Pending");
-            } else if (questresponse.booleanValue() == true) {
-                questResponse.setText("Accepted");
-                questResponse.setTextColor(Color.parseColor("#2db200"));
-            } else if (questresponse.booleanValue() == false) {
-                questResponse.setText("Rejected");
-                questResponse.setTextColor(Color.parseColor("#b30409"));
-            }
-            questMemberView.post(new Runnable() {
-                @Override
-                public void run() {
-                    questMemberView.addView(itemView);
-                }
-            });
-        }
+        viewAdapter.setGroup(group);
     }
 
 
