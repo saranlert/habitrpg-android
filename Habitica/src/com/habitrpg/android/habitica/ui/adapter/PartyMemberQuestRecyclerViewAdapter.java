@@ -1,4 +1,4 @@
-package com.habitrpg.android.habitica.ui.adapter.social;
+package com.habitrpg.android.habitica.ui.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
