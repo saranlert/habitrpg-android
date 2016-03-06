@@ -1,4 +1,4 @@
-package com.habitrpg.android.habitica.ui.adapter;
+package com.habitrpg.android.habitica.ui.adapter.social;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -79,7 +79,7 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
             Boolean rsvpneeded = group.quest.members.get(user.getId());
             if(rsvpneeded == null){
                 rsvpNeeded.setText("Pending");
-            }else if(rsvpneeded == true){
+            }else if(rsvpneeded){
                 rsvpNeeded.setText("Accepted");
             }else{ // rsvpneeded == false
                 rsvpNeeded.setText("Rejected");

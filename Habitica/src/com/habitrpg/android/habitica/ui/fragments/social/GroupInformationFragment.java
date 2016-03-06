@@ -1,24 +1,23 @@
 package com.habitrpg.android.habitica.ui.fragments.social;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
 import com.habitrpg.android.habitica.databinding.FragmentGroupInfoBinding;
+import com.habitrpg.android.habitica.databinding.ValueBarBinding;
+import com.habitrpg.android.habitica.ui.adapter.social.QuestCollectRecyclerViewAdapter;
 import com.habitrpg.android.habitica.ui.adapter.social.QuestMemberRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
@@ -27,8 +26,6 @@ import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.EventBusException;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -44,10 +41,16 @@ public class GroupInformationFragment extends Fragment {
     APIHelper mAPIHelper;
     @Bind(R.id.questMemberView)
     RecyclerView questMemberView;
+    @Bind(R.id.collectionStats)
+    RecyclerView collectionStats;
     private Group group;
+    private QuestContent quest;
     private HabitRPGUser user;
+    private ValueBarBinding bossHpBar;
+    private ValueBarBinding bossRageBar;
 
-    private QuestMemberRecyclerViewAdapter viewAdapter;
+    private QuestMemberRecyclerViewAdapter participantViewAdapter;
+    private QuestCollectRecyclerViewAdapter questCollectViewAdapter;
 
     public static GroupInformationFragment newInstance(Group group, HabitRPGUser user, APIHelper mAPIHelper) {
 
@@ -61,7 +64,7 @@ public class GroupInformationFragment extends Fragment {
         return fragment;
     }
 
-    public GroupInformationFragment(){
+    public GroupInformationFragment() {
 
     }
 
@@ -82,8 +85,15 @@ public class GroupInformationFragment extends Fragment {
 
         ButterKnife.bind(this, view);
         questMemberView.setLayoutManager(new LinearLayoutManager(getContext()));
-        viewAdapter = new QuestMemberRecyclerViewAdapter();
-        questMemberView.setAdapter(viewAdapter);
+        participantViewAdapter = new QuestMemberRecyclerViewAdapter();
+        questMemberView.setAdapter(participantViewAdapter);
+
+        collectionStats.setLayoutManager(new LinearLayoutManager(getContext()));
+        questCollectViewAdapter = new QuestCollectRecyclerViewAdapter();
+        collectionStats.setAdapter(questCollectViewAdapter);
+
+        bossHpBar = DataBindingUtil.bind(view.findViewById(R.id.bossHpBar));
+        bossRageBar = DataBindingUtil.bind(view.findViewById(R.id.bossRageBar));
 
         return view;
     }
@@ -102,17 +112,32 @@ public class GroupInformationFragment extends Fragment {
             updateQuestMember(group);
         }
 
+        updateQuestProgress(group, this.quest);
+
         this.group = group;
+    }
+
+    private void updateQuestProgress(final Group group, final QuestContent quest) {
+        if (group == null || quest == null) {
+            return;
+        }
+        questCollectViewAdapter.setQuestContent(quest);
+        questCollectViewAdapter.setQuestProgress(group.quest.getProgress());
+        bossHpBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.hp > 0) ? View.VISIBLE : View.GONE);
+        bossRageBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.rage_value > 0) ? View.VISIBLE : View.GONE);
     }
 
     public void setQuestContent(QuestContent quest) {
         if (viewBinding != null) {
             viewBinding.setQuest(quest);
         }
+
+        updateQuestProgress(this.group, quest);
+        this.quest = quest;
     }
 
     private void updateQuestMember(Group group) {
-        viewAdapter.setGroup(group);
+        participantViewAdapter.setGroup(group);
     }
 
 

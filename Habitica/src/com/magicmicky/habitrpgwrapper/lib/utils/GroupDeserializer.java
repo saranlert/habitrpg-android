@@ -21,7 +21,7 @@ public class GroupDeserializer implements JsonDeserializer<Group> {
         JsonObject obj = json.getAsJsonObject();
         group.id = obj.get("_id").getAsString();
         group.name = obj.get("name").getAsString();
-        if(obj.has("description")) {
+        if (obj.has("description")) {
             group.description = obj.get("description").getAsString();
         }
         if (obj.has("memberCount")) {
@@ -41,7 +41,8 @@ public class GroupDeserializer implements JsonDeserializer<Group> {
             }.getType());
         }
         if (obj.has("members")) {
-            group.members = context.deserialize(obj.get("members"), new TypeToken<List<HabitRPGUser>>(){}.getType());
+            group.members = context.deserialize(obj.get("members"), new TypeToken<List<HabitRPGUser>>() {
+            }.getType());
         }
         if (obj.has("leader")) {
             if (obj.get("leader").isJsonPrimitive()) {
@@ -50,8 +51,9 @@ public class GroupDeserializer implements JsonDeserializer<Group> {
                 group.leaderID = obj.get("leader").getAsJsonObject().get("_id").getAsString();
             }
         }
-        if(obj.has("quest")){
-            group.quest = context.deserialize(obj.get("quest"), new TypeToken<Quest>(){}.getType());
+        if (obj.has("quest")) {
+            group.quest = context.deserialize(obj.get("quest"), new TypeToken<Quest>() {
+            }.getType());
         }
 
         return group;

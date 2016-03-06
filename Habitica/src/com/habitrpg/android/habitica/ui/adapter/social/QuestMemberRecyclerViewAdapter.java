@@ -1,22 +1,13 @@
 package com.habitrpg.android.habitica.ui.adapter.social;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.databinding.DataBindingUtil;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.habitrpg.android.habitica.R;
-import com.habitrpg.android.habitica.databinding.ValueBarBinding;
-import com.habitrpg.android.habitica.ui.AvatarWithBarsViewModel;
-import com.habitrpg.android.habitica.ui.helpers.ViewHelper;
-import com.habitrpg.android.habitica.userpicture.UserPicture;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 
@@ -34,11 +25,11 @@ public class QuestMemberRecyclerViewAdapter extends RecyclerView.Adapter<QuestMe
     private ArrayList<HabitRPGUser> memberList;
     private Group group;
 
-    public void setGroup(Group group){
+    public void setGroup(Group group) {
         this.group = group;
-        if(memberList==null)memberList = new ArrayList<>();
+        if (memberList == null) memberList = new ArrayList<>();
         memberList.clear();
-        if(group.quest != null && group.quest.members != null) {
+        if (group.quest != null && group.quest.members != null) {
             for (HabitRPGUser member : group.members) {
                 if (group.quest.members.containsKey(member.getId()))
                     memberList.add(member);
@@ -88,17 +79,17 @@ public class QuestMemberRecyclerViewAdapter extends RecyclerView.Adapter<QuestMe
             else
                 userName.setText(user.getProfile().getName());
 
-            Boolean questresponse = group.quest.members.get(user.getId());
+            Boolean questResponse = group.quest.members.get(user.getId());
             if (group.quest.active) {
-                questResponse.setText("");
-            } else if (questresponse == null) {
-                questResponse.setText("Pending");
-            } else if (questresponse.booleanValue() == true) {
-                questResponse.setText("Accepted");
-                questResponse.setTextColor(Color.parseColor("#2db200"));
-            } else if (questresponse.booleanValue() == false) {
-                questResponse.setText("Rejected");
-                questResponse.setTextColor(Color.parseColor("#b30409"));
+                this.questResponse.setText("");
+            } else if (questResponse == null) {
+                this.questResponse.setText("Pending");
+            } else if (questResponse) {
+                this.questResponse.setText("Accepted");
+                this.questResponse.setTextColor(Color.parseColor("#2db200"));
+            } else {
+                this.questResponse.setText("Rejected");
+                this.questResponse.setTextColor(Color.parseColor("#b30409"));
             }
         }
     }
