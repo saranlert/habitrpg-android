@@ -38,11 +38,13 @@ public class QuestMemberRecyclerViewAdapter extends RecyclerView.Adapter<QuestMe
         this.group = group;
         if(memberList==null)memberList = new ArrayList<>();
         memberList.clear();
-        for(HabitRPGUser member:group.members){
-            if(group.quest.members.containsKey(member.getId()))
-                memberList.add(member);
+        if(group.quest != null && group.quest.members != null) {
+            for (HabitRPGUser member : group.members) {
+                if (group.quest.members.containsKey(member.getId()))
+                    memberList.add(member);
+            }
+            this.notifyDataSetChanged();
         }
-        this.notifyDataSetChanged();
     }
 
 
