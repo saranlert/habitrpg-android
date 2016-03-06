@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,8 @@ import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
 import com.habitrpg.android.habitica.databinding.FragmentGroupInfoBinding;
 import com.habitrpg.android.habitica.databinding.ValueBarBinding;
+import com.habitrpg.android.habitica.ui.adapter.PartyMemberQuestRecyclerViewAdapter;
 import com.habitrpg.android.habitica.ui.adapter.social.QuestCollectRecyclerViewAdapter;
-import com.habitrpg.android.habitica.ui.adapter.social.QuestMemberRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
@@ -49,7 +48,7 @@ public class GroupInformationFragment extends Fragment {
     private ValueBarBinding bossHpBar;
     private ValueBarBinding bossRageBar;
 
-    private QuestMemberRecyclerViewAdapter participantViewAdapter;
+    private PartyMemberQuestRecyclerViewAdapter participantViewAdapter;
     private QuestCollectRecyclerViewAdapter questCollectViewAdapter;
 
     public static GroupInformationFragment newInstance(Group group, HabitRPGUser user, APIHelper mAPIHelper) {
@@ -85,7 +84,7 @@ public class GroupInformationFragment extends Fragment {
 
         ButterKnife.bind(this, view);
         questMemberView.setLayoutManager(new LinearLayoutManager(getContext()));
-        participantViewAdapter = new QuestMemberRecyclerViewAdapter();
+        participantViewAdapter = new PartyMemberQuestRecyclerViewAdapter();
         questMemberView.setAdapter(participantViewAdapter);
 
         collectionStats.setLayoutManager(new LinearLayoutManager(getContext()));

@@ -1,7 +1,7 @@
 package com.habitrpg.android.habitica.ui.adapter;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,8 @@ import com.habitrpg.android.habitica.R;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 
+import java.util.ArrayList;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -19,12 +21,20 @@ import butterknife.ButterKnife;
  */
 public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<PartyMemberQuestRecyclerViewAdapter.MemberQuestViewHolder> {
 
-    Group group;
+    private ArrayList<HabitRPGUser> memberList;
+    private Group group;
 
     public void setGroup(Group group) {
-        Log.d("PartyMemberQuestFrag", "set group");
         this.group = group;
-        this.notifyDataSetChanged();
+        if (memberList == null) memberList = new ArrayList<>();
+        memberList.clear();
+        if (group.quest != null && group.quest.members != null) {
+            for (HabitRPGUser member : group.members) {
+                if (group.quest.members.containsKey(member.getId()))
+                    memberList.add(member);
+            }
+            this.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -32,23 +42,18 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
 
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.party_member_quest, parent, false);
-        Log.d("PartyMemberQuestFrag", "inflated");
 
         return new MemberQuestViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(MemberQuestViewHolder holder, int position) {
-        Log.d("PartyMemberQuestFrag", "call binder");
-
-        holder.bind(group.members.get(position));
+        holder.bind(memberList.get(position));
     }
 
     @Override
     public int getItemCount() {
-
-        Log.d("PartyMemberQuestFrag", "group " + ((group == null)? 0 : group.memberCount));
-        return (group == null)? 0 : group.memberCount;
+        return memberList == null ? 0 : memberList.size();
     }
 
     class MemberQuestViewHolder extends RecyclerView.ViewHolder {
@@ -57,32 +62,32 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
         TextView userName;
 
         @Bind(R.id.rsvpneeded)
-        TextView rsvpNeeded;
-
+        TextView questResponse;
 
         public MemberQuestViewHolder(View itemView) {
             super(itemView);
 
-            Log.d("PartyMemberQuestFrag", "VH init");
-
             ButterKnife.bind(this, itemView);
 
-            Log.d("PartyMemberFrag", "VH init");
         }
 
         public void bind(HabitRPGUser user) {
-            Log.d("PartyMemberQuestFrag", "bind " + user.getProfile().getName());
-            android.content.Context ctx = itemView.getContext();
+            if (group.quest.leader.equals(user.getId()))
+                userName.setText("* " + user.getProfile().getName());
+            else
+                userName.setText(user.getProfile().getName());
 
-            userName.setText(user.getProfile().getName());
-
-            Boolean rsvpneeded = group.quest.members.get(user.getId());
-            if(rsvpneeded == null){
-                rsvpNeeded.setText("Pending");
-            }else if(rsvpneeded){
-                rsvpNeeded.setText("Accepted");
-            }else{ // rsvpneeded == false
-                rsvpNeeded.setText("Rejected");
+            Boolean questResponse = group.quest.members.get(user.getId());
+            if (group.quest.active) {
+                this.questResponse.setText("");
+            } else if (questResponse == null) {
+                this.questResponse.setText("Pending");
+            } else if (questResponse) {
+                this.questResponse.setText("Accepted");
+                this.questResponse.setTextColor(Color.parseColor("#2db200"));
+            } else {
+                this.questResponse.setText("Rejected");
+                this.questResponse.setTextColor(Color.parseColor("#b30409"));
             }
         }
     }
