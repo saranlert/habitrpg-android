@@ -1,4 +1,4 @@
-package com.habitrpg.android.habitica.ui.fragments.social.party;
+package com.habitrpg.android.habitica.ui.fragments.social;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
-import com.habitrpg.android.habitica.databinding.FragmentPartyInfoBinding;
+import com.habitrpg.android.habitica.databinding.FragmentGroupInfoBinding;
 import com.habitrpg.android.habitica.ui.adapter.social.QuestMemberRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
@@ -27,8 +27,8 @@ import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.EventBusException;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.EventBusException;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -36,25 +36,24 @@ import retrofit.client.Response;
 /**
  * Created by Negue on 16.09.2015.
  */
-public class PartyInformationFragment extends Fragment {
+public class GroupInformationFragment extends Fragment {
 
 
     private View view;
-    FragmentPartyInfoBinding viewBinding;
+    FragmentGroupInfoBinding viewBinding;
     APIHelper mAPIHelper;
     @Bind(R.id.questMemberView)
     RecyclerView questMemberView;
     private Group group;
     private HabitRPGUser user;
-    private boolean registerEventBus;
 
     private QuestMemberRecyclerViewAdapter viewAdapter;
 
-    public static PartyInformationFragment newInstance(Group group, HabitRPGUser user, APIHelper mAPIHelper) {
+    public static GroupInformationFragment newInstance(Group group, HabitRPGUser user, APIHelper mAPIHelper) {
 
         Bundle args = new Bundle();
 
-        PartyInformationFragment fragment = new PartyInformationFragment();
+        GroupInformationFragment fragment = new GroupInformationFragment();
         fragment.setArguments(args);
         fragment.group = group;
         fragment.user = user;
@@ -62,7 +61,7 @@ public class PartyInformationFragment extends Fragment {
         return fragment;
     }
 
-    public PartyInformationFragment(){
+    public GroupInformationFragment(){
 
     }
 
@@ -70,7 +69,7 @@ public class PartyInformationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null)
-            view = inflater.inflate(R.layout.fragment_party_info, container, false);
+            view = inflater.inflate(R.layout.fragment_group_info, container, false);
 
         viewBinding = DataBindingUtil.bind(view);
         if (user != null) {
@@ -79,14 +78,6 @@ public class PartyInformationFragment extends Fragment {
 
         if (group != null) {
             setGroup(group);
-        }
-
-        // Receive Events
-        try {
-            EventBus.getDefault().register(this);
-            registerEventBus = true;
-        } catch (EventBusException ignored) {
-
         }
 
         ButterKnife.bind(this, view);
@@ -104,7 +95,7 @@ public class PartyInformationFragment extends Fragment {
 
     public void setGroup(Group group) {
         if (viewBinding != null) {
-            viewBinding.setParty(group);
+            viewBinding.setGroup(group);
         }
 
         if (questMemberView != null) {
@@ -112,14 +103,6 @@ public class PartyInformationFragment extends Fragment {
         }
 
         this.group = group;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (registerEventBus) {
-            EventBus.getDefault().unregister(this);
-        }
     }
 
     public void setQuestContent(QuestContent quest) {

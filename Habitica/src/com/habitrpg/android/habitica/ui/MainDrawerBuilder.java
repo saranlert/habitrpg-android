@@ -92,9 +92,9 @@ public class MainDrawerBuilder {
 
                         new DividerDrawerItem(),
                         //new SecondaryDrawerItem().withName(activity.getString(R.string.sidebar_news)),
-                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_settings)).withIdentifier(SIDEBAR_SETTINGS),
+                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_settings)).withIdentifier(SIDEBAR_SETTINGS).withSelectable(false),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_help)).withIdentifier(SIDEBAR_HELP),
-                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_about)).withIdentifier(SIDEBAR_ABOUT)
+                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_about)).withIdentifier(SIDEBAR_ABOUT).withSelectable(false)
 
                 )
                 .withStickyFooterDivider(false)
@@ -104,7 +104,8 @@ public class MainDrawerBuilder {
                         BaseMainFragment fragment = null;
                         Class newActivityClass = null;
 
-                        switch ((int)drawerItem.getIdentifier()) {
+                        int identifier = (int) drawerItem.getIdentifier();
+                        switch (identifier) {
                             case SIDEBAR_TASKS: {
                                 fragment = new TasksFragment();
                                 break;
