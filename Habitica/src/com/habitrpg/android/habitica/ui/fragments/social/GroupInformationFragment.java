@@ -16,6 +16,7 @@ import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
 import com.habitrpg.android.habitica.databinding.FragmentGroupInfoBinding;
 import com.habitrpg.android.habitica.databinding.ValueBarBinding;
+import com.habitrpg.android.habitica.ui.DividerItemDecoration;
 import com.habitrpg.android.habitica.ui.adapter.PartyMemberQuestRecyclerViewAdapter;
 import com.habitrpg.android.habitica.ui.adapter.social.QuestCollectRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
@@ -84,6 +85,7 @@ public class GroupInformationFragment extends Fragment {
 
         ButterKnife.bind(this, view);
         questMemberView.setLayoutManager(new LinearLayoutManager(getContext()));
+        questMemberView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
         participantViewAdapter = new PartyMemberQuestRecyclerViewAdapter();
         questMemberView.setAdapter(participantViewAdapter);
 
