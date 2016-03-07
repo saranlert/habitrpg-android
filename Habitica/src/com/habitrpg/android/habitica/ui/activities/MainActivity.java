@@ -12,10 +12,10 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -25,20 +25,22 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.amplitude.api.Amplitude;
 import com.habitrpg.android.habitica.APIHelper;
+import com.habitrpg.android.habitica.ContentCache;
 import com.habitrpg.android.habitica.HabiticaApplication;
 import com.habitrpg.android.habitica.HostConfig;
 import com.habitrpg.android.habitica.NotificationPublisher;
 import com.habitrpg.android.habitica.R;
-import com.habitrpg.android.habitica.events.DisplayFragmentEvent;
-import com.habitrpg.android.habitica.events.DisplayTutorialEvent;
-import com.habitrpg.android.habitica.ui.TutorialView;
 import com.habitrpg.android.habitica.callbacks.HabitRPGUserCallback;
 import com.habitrpg.android.habitica.callbacks.TaskScoringCallback;
 import com.habitrpg.android.habitica.callbacks.UnlockCallback;
+import com.habitrpg.android.habitica.databinding.DialogQuestRsvpBinding;
 import com.habitrpg.android.habitica.databinding.ValueBarBinding;
+import com.habitrpg.android.habitica.events.DisplayFragmentEvent;
+import com.habitrpg.android.habitica.events.DisplayTutorialEvent;
 import com.habitrpg.android.habitica.events.TaskRemovedEvent;
 import com.habitrpg.android.habitica.events.ToggledInnStateEvent;
 import com.habitrpg.android.habitica.events.commands.BuyRewardCommand;
@@ -49,12 +51,15 @@ import com.habitrpg.android.habitica.events.commands.UnlockPathCommand;
 import com.habitrpg.android.habitica.events.commands.UpdateUserCommand;
 import com.habitrpg.android.habitica.ui.AvatarWithBarsViewModel;
 import com.habitrpg.android.habitica.ui.MainDrawerBuilder;
+import com.habitrpg.android.habitica.ui.TutorialView;
 import com.habitrpg.android.habitica.ui.UiUtils;
 import com.habitrpg.android.habitica.ui.fragments.BaseMainFragment;
 import com.habitrpg.android.habitica.ui.fragments.GemsPurchaseFragment;
 import com.habitrpg.android.habitica.userpicture.UserPicture;
 import com.habitrpg.android.habitica.userpicture.UserPictureRunnable;
+import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
+import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
 import com.magicmicky.habitrpgwrapper.lib.models.SuppressedModals;
 import com.magicmicky.habitrpgwrapper.lib.models.TaskDirection;
 import com.magicmicky.habitrpgwrapper.lib.models.TaskDirectionData;
@@ -77,6 +82,7 @@ import com.raizlabs.android.dbflow.sql.language.From;
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.sql.language.Where;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +100,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
-import org.greenrobot.eventbus.EventBus;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -132,6 +137,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     private Date lastSync;
 
     private TutorialView activeTutorialView;
+    private MaterialDialog questRsvpDialog;
 
     @Override
     protected int getLayoutResId() {
@@ -472,6 +478,10 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         this.user = user;
         this.lastSync = new Date();
         MainActivity.this.setUserData(false);
+        Log.i("QuestRSVP", user.getProfile().getName() + " " + user.getParty().getQuest().RSVPNeeded);
+        if (user.getParty().getQuest().RSVPNeeded) {
+            displayQuestRSVPDialog();
+        }
     }
 
     @Override
@@ -786,6 +796,89 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         dialog.show();
     }
 
+    private void displayQuestRSVPDialog() {
+        mAPIHelper.apiService.getGroup("party", new Callback<Group>() {
+            @Override
+            public void success(final Group group, Response response) {
+
+                new ContentCache(mAPIHelper.apiService).GetQuestContent(group.quest.getKey(), new ContentCache.QuestContentCallback() {
+                    @Override
+                    public void GotQuest(QuestContent content) {
+
+                        if (questRsvpDialog == null) {
+                            questRsvpDialog = new MaterialDialog.Builder(MainActivity.this)
+                                    .title("Quest Invitation: "+ content.text)
+                                    .customView(R.layout.dialog_quest_rsvp, true)
+                                    .positiveText("Accept")
+                                    .positiveColorRes(R.color.brand_100)
+                                    .neutralText("Ask Later")
+                                    .negativeText("Reject")
+                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                                            mAPIHelper.apiService.acceptQuest(group.id, new Callback<Void>() {
+                                                @Override
+                                                public void success(Void aVoid, Response response) {
+
+                                                }
+
+                                                @Override
+                                                public void failure(RetrofitError error) {
+
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                                            mAPIHelper.apiService.rejectQuest(group.id, new Callback<Void>() {
+                                                @Override
+                                                public void success(Void aVoid, Response response) {
+
+                                                }
+
+                                                @Override
+                                                public void failure(RetrofitError error) {
+
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .dismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            questRsvpDialog = null;
+                                        }
+                                    })
+                                    .cancelListener(new DialogInterface.OnCancelListener() {
+                                        @Override
+                                        public void onCancel(DialogInterface dialog) {
+                                            questRsvpDialog = null;
+                                        }
+                                    })
+                                    .build();
+
+                            View customView = questRsvpDialog.getCustomView();
+                            if (customView != null) {
+                                DialogQuestRsvpBinding binding = DataBindingUtil.bind(customView);
+                                binding.setQuest(content);
+                            }
+
+                            questRsvpDialog.show();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+    }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_MENU && drawer != null) {

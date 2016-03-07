@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.magicmicky.habitrpgwrapper.lib.models.QuestContent" />
+
+        <import type="android.view.View" />
+
+        <import type="android.text.Html" />
+
+        <variable
+            name="quest"
+            type="QuestContent" />
+
+    </data>
+
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbarSize="3dp"
+        android:scrollbarThumbVertical="@color/md_grey_500"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                bind:questImageName='@{"quest_"+ quest.key}' />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{quest.notes != null ? Html.fromHtml(quest.notes) : null}" />
+
+
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+</layout>
