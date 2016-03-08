@@ -44,8 +44,8 @@ public class GroupInformationFragment extends Fragment {
     @Bind(R.id.collectionStats)
     RecyclerView collectionStats;
     private Group group;
-    private QuestContent quest;
     private HabitRPGUser user;
+    private QuestContent quest;
     private ValueBarBinding bossHpBar;
     private ValueBarBinding bossRageBar;
 
@@ -64,7 +64,7 @@ public class GroupInformationFragment extends Fragment {
         return fragment;
     }
 
-    public GroupInformationFragment() {
+    public GroupInformationFragment(){
 
     }
 
@@ -99,11 +99,6 @@ public class GroupInformationFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
     public void setGroup(Group group) {
         if (viewBinding != null) {
             viewBinding.setGroup(group);
@@ -113,19 +108,9 @@ public class GroupInformationFragment extends Fragment {
             updateQuestMember(group);
         }
 
-        updateQuestProgress(group, this.quest);
+        updateQuestProgress(group, quest);
 
         this.group = group;
-    }
-
-    private void updateQuestProgress(final Group group, final QuestContent quest) {
-        if (group == null || quest == null) {
-            return;
-        }
-        questCollectViewAdapter.setQuestContent(quest);
-        questCollectViewAdapter.setQuestProgress(group.quest.getProgress());
-        bossHpBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.hp > 0) ? View.VISIBLE : View.GONE);
-        bossRageBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.rage_value > 0) ? View.VISIBLE : View.GONE);
     }
 
     public void setQuestContent(QuestContent quest) {
@@ -133,8 +118,19 @@ public class GroupInformationFragment extends Fragment {
             viewBinding.setQuest(quest);
         }
 
-        updateQuestProgress(this.group, quest);
+        updateQuestProgress(group, quest);
+
         this.quest = quest;
+    }
+
+    private void updateQuestProgress(Group group, QuestContent quest) {
+        if (group == null || quest == null) {
+            return;
+        }
+        questCollectViewAdapter.setQuestContent(quest);
+        questCollectViewAdapter.setQuestProgress(group.quest.getProgress());
+        bossHpBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.hp > 0) ? View.VISIBLE : View.GONE);
+        bossRageBar.valueBarLayout.setVisibility((quest.boss != null && quest.boss.rage_value > 0) ? View.VISIBLE : View.GONE);
     }
 
     private void updateQuestMember(Group group) {

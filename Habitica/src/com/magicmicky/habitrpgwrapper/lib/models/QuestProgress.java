@@ -24,7 +24,7 @@ public class QuestProgress extends BaseModel {
     @Column
     public double hp, rage;
 
-    public HashMap<String,Integer> collect;
+    public HashMap<String, Integer> collect;
 
     private QuestProgress(float down, float up) {
         this.down = down;

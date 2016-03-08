@@ -1,7 +1,5 @@
 package com.magicmicky.habitrpgwrapper.lib.models;
 
-import android.util.Log;
-
 import com.habitrpg.android.habitica.HabitDatabase;
 import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;

@@ -46,8 +46,7 @@ public class GroupSerialization implements JsonDeserializer<Group>, JsonSerializ
             }.getType());
         }
         if (obj.has("members")) {
-            group.members = context.deserialize(obj.get("members"), new TypeToken<List<HabitRPGUser>>() {
-            }.getType());
+            group.members = context.deserialize(obj.get("members"), new TypeToken<List<HabitRPGUser>>(){}.getType());
         }
         if (obj.has("leader")) {
             if (obj.get("leader").isJsonPrimitive()) {
