@@ -4,6 +4,7 @@ import com.magicmicky.habitrpgwrapper.lib.api.ApiService;
 import com.magicmicky.habitrpgwrapper.lib.models.ContentResult;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestBoss;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
+import com.magicmicky.habitrpgwrapper.lib.models.QuestDrop;
 import com.magicmicky.habitrpgwrapper.lib.models.tasks.ItemData;
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -40,6 +41,7 @@ public class ContentCache {
 
         if (quest != null) {
             quest.boss = new Select().from(QuestBoss.class).where(Condition.column("key").eq(key)).querySingle();
+            quest.drop = new Select().from(QuestDrop.class).where(Condition.column("key").eq(key)).querySingle();
             cb.GotQuest(quest);
         } else {
 
@@ -178,6 +180,10 @@ public class ContentCache {
             if (quest.boss != null) {
                 quest.boss.key = quest.key;
                 quest.boss.async().save();
+            }
+            if(quest.drop != null){
+                quest.drop.key = quest.key;
+                quest.drop.async().save();
             }
         }
 

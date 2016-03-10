@@ -81,6 +81,6 @@ public class QuestContent extends BaseModel {
         super.save();
     }
 
-    // todo drops
+    public QuestDrop drop;
 }
 

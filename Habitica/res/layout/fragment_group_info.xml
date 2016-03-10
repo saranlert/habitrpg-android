@@ -154,6 +154,11 @@
                         android:layout_height="wrap_content"
                         android:text="@{quest.notes != null ? Html.fromHtml(quest.notes) : null}"
                         />
+                    <LinearLayout
+                        android:id="@+id/questDrop"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
 
                 </LinearLayout>
 

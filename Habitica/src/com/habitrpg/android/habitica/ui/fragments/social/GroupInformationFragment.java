@@ -1,16 +1,20 @@
 package com.habitrpg.android.habitica.ui.fragments.social;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.habitrpg.android.habitica.APIHelper;
 import com.habitrpg.android.habitica.R;
@@ -22,6 +26,9 @@ import com.habitrpg.android.habitica.ui.adapter.social.QuestCollectRecyclerViewA
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
+import com.magicmicky.habitrpgwrapper.lib.models.QuestDropItem;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -43,6 +50,8 @@ public class GroupInformationFragment extends Fragment {
     RecyclerView questMemberView;
     @Bind(R.id.collectionStats)
     RecyclerView collectionStats;
+    @Bind(R.id.questDrop)
+    LinearLayout questDrop;
     private Group group;
     private HabitRPGUser user;
     private QuestContent quest;
@@ -64,7 +73,7 @@ public class GroupInformationFragment extends Fragment {
         return fragment;
     }
 
-    public GroupInformationFragment(){
+    public GroupInformationFragment() {
 
     }
 
@@ -118,9 +127,42 @@ public class GroupInformationFragment extends Fragment {
             viewBinding.setQuest(quest);
         }
 
+        updateQuestDrop(quest);
+
         updateQuestProgress(group, quest);
 
         this.quest = quest;
+    }
+
+    private void updateQuestDrop(QuestContent quest) {
+
+        questDrop.removeAllViewsInLayout();
+        if (quest.drop == null) return;
+
+        ArrayList<String> a = new ArrayList<>();
+        for (QuestDropItem i : quest.drop.getItems()) {
+            a.add(i.text);
+        }
+        if (quest.drop.exp > 0) {
+            a.add(Integer.toString(quest.drop.exp) + " Experience");
+        }
+        if (quest.drop.gp > 0) {
+            a.add(Integer.toString(quest.drop.gp) + " Gold");
+        }
+        if (!quest.drop.unlock.equals("")) {
+            a.add(quest.drop.unlock);
+        }
+        LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (String s : a) {
+            final AppCompatTextView textView = (AppCompatTextView) layoutInflater.inflate(android.R.layout.simple_list_item_1, null);
+            textView.setText(s);
+            questDrop.post(new Runnable() {
+                @Override
+                public void run() {
+                    questDrop.addView(textView);
+                }
+            });
+        }
     }
 
     private void updateQuestProgress(Group group, QuestContent quest) {
