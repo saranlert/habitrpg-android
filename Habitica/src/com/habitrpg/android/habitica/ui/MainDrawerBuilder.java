@@ -13,11 +13,13 @@ import com.habitrpg.android.habitica.ui.fragments.inventory.customization.Avatar
 import com.habitrpg.android.habitica.ui.fragments.BaseMainFragment;
 import com.habitrpg.android.habitica.ui.fragments.faq.FAQOverviewFragment;
 import com.habitrpg.android.habitica.ui.fragments.GemsPurchaseFragment;
+import com.habitrpg.android.habitica.ui.fragments.inventory.equipment.EquipmentOverviewFragment;
 import com.habitrpg.android.habitica.ui.fragments.social.GuildsOverviewFragment;
 import com.habitrpg.android.habitica.ui.fragments.social.party.PartyFragment;
 import com.habitrpg.android.habitica.ui.fragments.SkillsFragment;
 import com.habitrpg.android.habitica.ui.fragments.tasks.TasksFragment;
 import com.habitrpg.android.habitica.ui.fragments.social.TavernFragment;
+import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -64,7 +66,7 @@ public class MainDrawerBuilder {
     }
 
 
-    public static DrawerBuilder CreateDefaultBuilderSettings(final MainActivity activity, Toolbar toolbar, AccountHeader accountHeader) {
+    public static DrawerBuilder CreateDefaultBuilderSettings(final MainActivity activity, Toolbar toolbar, final AccountHeader accountHeader) {
         DrawerBuilder builder = new DrawerBuilder()
                 .withActivity(activity);
 
@@ -86,7 +88,7 @@ public class MainDrawerBuilder {
 
                         new SectionDrawerItem().withName(activity.getString(R.string.sidebar_section_inventory)),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_avatar)).withIdentifier(SIDEBAR_AVATAR),
-                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_equipment)).withIdentifier(SIDEBAR_EQUIPMENT).withEnabled(false).withBadge(R.string.coming_soon),
+                        new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_equipment)).withIdentifier(SIDEBAR_EQUIPMENT),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_stable)).withIdentifier(SIDEBAR_STABLE).withEnabled(false).withBadge(R.string.coming_soon),
                         new PrimaryDrawerItem().withName(activity.getString(R.string.sidebar_purchaseGems)).withIdentifier(SIDEBAR_PURCHASE),
 
@@ -130,6 +132,10 @@ public class MainDrawerBuilder {
                                 fragment = new AvatarOverviewFragment();
                                 break;
                             }
+                            case SIDEBAR_EQUIPMENT: {
+                                fragment = new EquipmentOverviewFragment();
+                                break;
+                            }
                             case SIDEBAR_PURCHASE: {
                                 fragment = new GemsPurchaseFragment();
                                 break;
@@ -154,7 +160,9 @@ public class MainDrawerBuilder {
                             return false;
                         }
                         if (newActivityClass != null) {
-                            activity.startActivity(new Intent(activity, newActivityClass));
+                            Intent passUserId = new Intent(activity, newActivityClass);
+                            passUserId.putExtra("userId", activity.getUserID());
+                            activity.startActivity(passUserId);
                             return false;
                         }
 

@@ -108,10 +108,10 @@ public class ContentCache {
                         } else if (searchKey == "armoire") {
                             searchedItem = (T) contentResult.armoire;
                         } else {
-                            Collection<ItemData> itemList = contentResult.gear.flat.values();
+                            Collection<ItemData> itemList = contentResult.gear.flat;
 
                             for (ItemData item : itemList) {
-                                if (item.key == searchKey) {
+                                if (item.key.equals(searchKey)) {
                                     searchedItem = (T) item;
                                 }
                             }
@@ -143,7 +143,7 @@ public class ContentCache {
                     case "item": {
                         List<T> resultList = new ArrayList<T>();
 
-                        List<ItemData> itemList = new ArrayList<ItemData>(contentResult.gear.flat.values());
+                        List<ItemData> itemList = new ArrayList<ItemData>(contentResult.gear.flat);
                         itemList.add(contentResult.potion);
                         itemList.add(contentResult.armoire);
 
@@ -187,7 +187,7 @@ public class ContentCache {
             }
         }
 
-        Collection<ItemData> itemList = new ArrayList<>(contentResult.gear.flat.values());
+        Collection<ItemData> itemList = new ArrayList<>(contentResult.gear.flat);
         itemList.add(contentResult.armoire);
         itemList.add(contentResult.potion);
 

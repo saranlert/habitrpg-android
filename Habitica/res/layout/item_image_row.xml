@@ -13,10 +13,10 @@
             android:layout_height="wrap_content"
             android:minHeight="60dp"
             android:padding="5dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="@dimen/row_padding"
+            android:paddingBottom="@dimen/row_padding"
             android:clickable="true"
-            android:background="@drawable/btn_habit_background">
+            android:background="@drawable/selection_highlight">
             <ImageView
                 android:layout_width="60dp"
                 android:layout_height="60dp"

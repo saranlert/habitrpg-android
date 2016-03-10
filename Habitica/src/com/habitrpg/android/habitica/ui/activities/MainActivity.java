@@ -34,6 +34,11 @@ import com.habitrpg.android.habitica.HabiticaApplication;
 import com.habitrpg.android.habitica.HostConfig;
 import com.habitrpg.android.habitica.NotificationPublisher;
 import com.habitrpg.android.habitica.R;
+import com.habitrpg.android.habitica.callbacks.ItemsCallback;
+import com.habitrpg.android.habitica.events.DisplayFragmentEvent;
+import com.habitrpg.android.habitica.events.DisplayTutorialEvent;
+import com.habitrpg.android.habitica.events.commands.EquipGearCommand;
+import com.habitrpg.android.habitica.ui.TutorialView;
 import com.habitrpg.android.habitica.callbacks.HabitRPGUserCallback;
 import com.habitrpg.android.habitica.callbacks.TaskScoringCallback;
 import com.habitrpg.android.habitica.callbacks.UnlockCallback;
@@ -57,6 +62,7 @@ import com.habitrpg.android.habitica.ui.fragments.BaseMainFragment;
 import com.habitrpg.android.habitica.ui.fragments.GemsPurchaseFragment;
 import com.habitrpg.android.habitica.userpicture.UserPicture;
 import com.habitrpg.android.habitica.userpicture.UserPictureRunnable;
+import com.magicmicky.habitrpgwrapper.lib.models.Gear;
 import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
@@ -536,6 +542,15 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     }
 
     @Subscribe
+    public void onEvent(EquipGearCommand event) {
+        if (event.asCostume) {
+            this.mAPIHelper.apiService.equipCostume(event.gear.key, new ItemsCallback(this, this.user));
+        } else {
+            this.mAPIHelper.apiService.equipBattleGear(event.gear.key, new ItemsCallback(this, this.user));
+        }
+    }
+
+    @Subscribe
     public void onEvent(UnlockPathCommand event) {
         this.user.setBalance(this.user.getBalance() - event.balanceDiff);
         mAPIHelper.apiService.unlockPath(event.path, new UnlockCallback(this, this.user));
@@ -978,5 +993,9 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
             this.overlayFrameLayout.removeView(this.activeTutorialView);
             this.activeTutorialView = null;
         }
+    }
+
+    public String getUserID(){
+        return user.getId();
     }
 }
