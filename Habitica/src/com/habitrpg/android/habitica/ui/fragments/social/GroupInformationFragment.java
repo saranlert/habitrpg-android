@@ -7,7 +7,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -154,12 +153,13 @@ public class GroupInformationFragment extends Fragment {
         }
         LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         for (String s : a) {
-            final AppCompatTextView textView = (AppCompatTextView) layoutInflater.inflate(android.R.layout.simple_list_item_1, null);
+            final LinearLayout itemView = (LinearLayout) layoutInflater.inflate(R.layout.quest_drop_item, null);
+            TextView textView = (TextView) itemView.findViewById(R.id.textView);
             textView.setText(s);
             questDrop.post(new Runnable() {
                 @Override
                 public void run() {
-                    questDrop.addView(textView);
+                    questDrop.addView(itemView);
                 }
             });
         }
