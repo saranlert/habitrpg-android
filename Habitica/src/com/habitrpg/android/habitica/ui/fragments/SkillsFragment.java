@@ -12,12 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.habitrpg.android.habitica.R;
-import com.habitrpg.android.habitica.ui.UiUtils;
-import com.habitrpg.android.habitica.ui.activities.SkillTasksActivity;
 import com.habitrpg.android.habitica.callbacks.HabitRPGUserCallback;
 import com.habitrpg.android.habitica.callbacks.SkillCallback;
 import com.habitrpg.android.habitica.events.SkillUsedEvent;
 import com.habitrpg.android.habitica.events.commands.UseSkillCommand;
+import com.habitrpg.android.habitica.ui.UiUtils;
+import com.habitrpg.android.habitica.ui.activities.SkillTasksActivity;
 import com.habitrpg.android.habitica.ui.adapter.SkillsRecyclerViewAdapter;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.Skill;
@@ -26,6 +26,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -81,12 +82,16 @@ public class SkillsFragment extends BaseMainFragment {
 
         adapter.mana = this.user.getStats().getMp();
 
-        List<Skill> skills = new Select()
-                .from(Skill.class)
-                .where(Condition.column("habitClass").eq(user.getStats().get_class()))
-                .and(Condition.column("lvl").lessThanOrEq(user.getStats().getLvl()))
-                .queryList();
-        adapter.setSkillList(skills);
+        if (!user.getPreferences().getDisableClasses()) {
+            List<Skill> skills = new Select()
+                    .from(Skill.class)
+                    .where(Condition.column("habitClass").eq(user.getStats().get_class()))
+                    .and(Condition.column("lvl").lessThanOrEq(user.getStats().getLvl()))
+                    .queryList();
+            adapter.setSkillList(skills);
+        } else {
+            adapter.setSkillList(new ArrayList<Skill>());
+        }
     }
 
     @Override
