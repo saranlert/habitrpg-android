@@ -34,12 +34,8 @@ import com.habitrpg.android.habitica.HabiticaApplication;
 import com.habitrpg.android.habitica.HostConfig;
 import com.habitrpg.android.habitica.NotificationPublisher;
 import com.habitrpg.android.habitica.R;
-import com.habitrpg.android.habitica.callbacks.ItemsCallback;
-import com.habitrpg.android.habitica.events.DisplayFragmentEvent;
-import com.habitrpg.android.habitica.events.DisplayTutorialEvent;
-import com.habitrpg.android.habitica.events.commands.EquipGearCommand;
-import com.habitrpg.android.habitica.ui.TutorialView;
 import com.habitrpg.android.habitica.callbacks.HabitRPGUserCallback;
+import com.habitrpg.android.habitica.callbacks.ItemsCallback;
 import com.habitrpg.android.habitica.callbacks.TaskScoringCallback;
 import com.habitrpg.android.habitica.callbacks.UnlockCallback;
 import com.habitrpg.android.habitica.databinding.DialogQuestRsvpBinding;
@@ -50,6 +46,7 @@ import com.habitrpg.android.habitica.events.TaskRemovedEvent;
 import com.habitrpg.android.habitica.events.ToggledInnStateEvent;
 import com.habitrpg.android.habitica.events.commands.BuyRewardCommand;
 import com.habitrpg.android.habitica.events.commands.DeleteTaskCommand;
+import com.habitrpg.android.habitica.events.commands.EquipGearCommand;
 import com.habitrpg.android.habitica.events.commands.OpenGemPurchaseFragmentCommand;
 import com.habitrpg.android.habitica.events.commands.OpenMenuItemCommand;
 import com.habitrpg.android.habitica.events.commands.UnlockPathCommand;
@@ -130,7 +127,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
     public Drawer drawer;
     public Drawer filterDrawer;
     protected HostConfig hostConfig;
-    protected HabitRPGUser user;
+    public HabitRPGUser user;
     private AccountHeader accountHeader;
     private BaseMainFragment activeFragment;
     private AvatarWithBarsViewModel avatarInHeader;
@@ -236,6 +233,9 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         if (this.activeFragment != null && fragment.getClass() == this.activeFragment.getClass()) {
             return;
         }
+        if (this.isDestroyed()) {
+            return;
+        }
         this.activeFragment = fragment;
         fragment.setArguments(getIntent().getExtras());
         fragment.mAPIHelper = mAPIHelper;
@@ -243,6 +243,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
         fragment.setActivity(this);
         fragment.setTabLayout(detail_tabs);
         fragment.setFloatingMenuWrapper(floatingMenuWrapper);
+
 
         if (getSupportFragmentManager().getFragments() == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commitAllowingStateLoss();
@@ -509,7 +510,7 @@ public class MainActivity extends BaseActivity implements HabitRPGUserCallback.O
             drawer.getDrawerLayout().closeDrawer(GravityCompat.END);
         } else {
             super.onBackPressed();
-
+            this.activeFragment.updateUserData(user);
         }
     }
 

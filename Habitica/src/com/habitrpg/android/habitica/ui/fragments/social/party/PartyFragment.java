@@ -19,8 +19,6 @@ import com.magicmicky.habitrpgwrapper.lib.models.Group;
 import com.magicmicky.habitrpgwrapper.lib.models.QuestContent;
 import com.magicmicky.habitrpgwrapper.lib.models.UserParty;
 
-import java.util.HashMap;
-
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -104,14 +102,17 @@ public class PartyFragment extends BaseMainFragment {
 
     public void setViewPagerAdapter() {
         android.support.v4.app.FragmentManager fragmentManager = getChildFragmentManager();
+        if (this.user == null) {
+            return;
+        }
 
-        UserParty party = user.getParty();
+        UserParty party = this.user.getParty();
 
         if(party == null) {
             return;
         }
 
-        viewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
+        this.viewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
 
             @Override
             public Fragment getItem(int position) {

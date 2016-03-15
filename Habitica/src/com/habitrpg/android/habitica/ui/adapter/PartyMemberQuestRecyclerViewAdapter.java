@@ -1,5 +1,6 @@
 package com.habitrpg.android.habitica.ui.adapter;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
 
     private ArrayList<HabitRPGUser> memberList;
     private Group group;
+    private Context context;
 
     public void setGroup(Group group) {
         this.group = group;
@@ -42,7 +44,7 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
 
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.party_member_quest, parent, false);
-
+        context = parent.getContext();
         return new MemberQuestViewHolder(view);
     }
 
@@ -84,10 +86,10 @@ public class PartyMemberQuestRecyclerViewAdapter extends RecyclerView.Adapter<Pa
                 this.questResponse.setText("Pending");
             } else if (questResponse) {
                 this.questResponse.setText("Accepted");
-                this.questResponse.setTextColor(Color.parseColor("#2db200"));
+                this.questResponse.setTextColor(context.getResources().getColor(R.color.good_10));
             } else {
                 this.questResponse.setText("Rejected");
-                this.questResponse.setTextColor(Color.parseColor("#b30409"));
+                this.questResponse.setTextColor(context.getResources().getColor(R.color.worse_10));
             }
         }
     }

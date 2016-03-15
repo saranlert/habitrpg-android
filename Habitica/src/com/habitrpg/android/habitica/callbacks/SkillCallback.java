@@ -1,11 +1,11 @@
 package com.habitrpg.android.habitica.callbacks;
 
-import com.crashlytics.android.Crashlytics;
 import com.habitrpg.android.habitica.events.SkillUsedEvent;
 import com.magicmicky.habitrpgwrapper.lib.models.HabitRPGUser;
 import com.magicmicky.habitrpgwrapper.lib.models.Skill;
 
 import org.greenrobot.eventbus.EventBus;
+
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
