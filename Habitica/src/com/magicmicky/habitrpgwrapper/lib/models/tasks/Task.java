@@ -465,6 +465,12 @@ public class Task extends BaseModel {
         return R.color.best_10;
     }
 
+    public static Calendar startOfDay(Calendar calendar) {
+        return new GregorianCalendar(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+    }
+
     public Boolean isDue(int offset) {
         if (this.getCompleted()) {
             return true;
@@ -476,9 +482,7 @@ public class Task extends BaseModel {
         if (this.getStartDate() != null) {
             Calendar startDate = new GregorianCalendar();
             startDate.setTime(this.getStartDate());
-            Calendar startDateAtMidnight = new GregorianCalendar(startDate.get(Calendar.YEAR),
-                    startDate.get(Calendar.MONTH),
-                    startDate.get(Calendar.DAY_OF_MONTH));
+            Calendar startDateAtMidnight = startOfDay(startDate);
 
             if ( startDateAtMidnight.after(today) ) {
                 return false;
@@ -495,7 +499,7 @@ public class Task extends BaseModel {
                 startDate.setTime(this.getStartDate());
             }
             TimeUnit timeUnit = TimeUnit.DAYS;
-            long diffInMillies = startDate.getTimeInMillis() - today.getTimeInMillis();
+            long diffInMillies = startOfDay(startDate).getTimeInMillis() - today.getTimeInMillis();
             long daySinceStart = timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
             return (daySinceStart % this.getEveryX() == 0);
         } else {
