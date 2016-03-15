@@ -84,7 +84,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
 
     Map<Integer, TaskRecyclerViewFragment> ViewFragmentsDictionary = new HashMap<>();
 
-    private TagsHelper tagsHelper; // This will be used for this fragment. Currently being used to help filtering
+    private TagsHelper tagsHelper = new TagsHelper(); // This will be used for this fragment. Currently being used to help filtering
     private TagsHelper tagsNameHelper; // Added this so other activities/fragments can get the String names, not IDs
     private TagsHelper tagsIdHelper; // Added this so other activities/fragments can get the IDs
     private ContentCache contentCache;
@@ -100,16 +100,16 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (this.tagsHelper == null) {
-            this.tagsHelper = new TagsHelper();
-        }
+//        if (this.tagsHelper == null) {
+//            this.tagsHelper = new TagsHelper();
+//        }
 
         //Without these following if statements, the Fragment has no way to pass the Tags to other activities/fragments
 
         if (this.tagsIdHelper == null && user != null) {
             this.tagsIdHelper = new TagsHelper();
             //Pass in the information of the user because TagsHelper does the filtering.
-            for(Tag userTags : user.getTags()){
+            for (Tag userTags : user.getTags()) {
                 tagsIdHelper.addTags(userTags.getId());
             }
         }
@@ -117,7 +117,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
         //This is to pass the names into other activities, not just their IDs
         if (this.tagsNameHelper == null && user != null) {
             this.tagsNameHelper = new TagsHelper();
-            for(Tag userTags : user.getTags()){
+            for (Tag userTags : user.getTags()) {
 
                 tagsNameHelper.addTags(userTags.getName());
             }
@@ -217,7 +217,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
 
         refreshItem.setActionView(iv);
 
-        if(mAPIHelper != null) {
+        if (mAPIHelper != null) {
             mAPIHelper.retrieveUser(new HabitRPGUserCallback(activity));
         }
     }
@@ -258,7 +258,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
                                     public void GetAdditionalEntries(final IReceiveNewEntries callBack) {
 
                                         // request buyable gear
-                                        if(mAPIHelper != null){
+                                        if (mAPIHelper != null) {
                                             mAPIHelper.apiService.getInventoryBuyableGear(new Callback<List<ItemData>>() {
                                                 @Override
                                                 public void success(List<ItemData> itemDatas, Response response) {
@@ -269,7 +269,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
                                                         itemKeys.add(item.key);
                                                     }
                                                     itemKeys.add("potion");
-                                                    if(user.getFlags().getArmoireEnabled())
+                                                    if (user.getFlags().getArmoireEnabled())
                                                         itemKeys.add("armoire");
 
                                                     contentCache.GetItemDataList(itemKeys, new ContentCache.GotContentEntryCallback<List<ItemData>>() {
@@ -398,7 +398,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
         final Tag t = new Tag();
         t.setName(event.tagName);
 
-        if (mAPIHelper != null){
+        if (mAPIHelper != null) {
             mAPIHelper.apiService.createTag(t, new Callback<List<Tag>>() {
                 @Override
                 public void success(List<Tag> tags, Response response) {
@@ -544,7 +544,7 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
 
     @Override
     public void onDestroyView() {
-        DrawerLayout layout =  this.activity.filterDrawer.getDrawerLayout();
+        DrawerLayout layout = this.activity.filterDrawer.getDrawerLayout();
         layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
         super.onDestroyView();
     }
@@ -552,9 +552,9 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (TASK_CREATED_RESULT) :
-            case (TASK_UPDATED_RESULT) :
+        switch (requestCode) {
+            case (TASK_CREATED_RESULT):
+            case (TASK_UPDATED_RESULT):
                 this.displayingTaskForm = false;
                 break;
         }

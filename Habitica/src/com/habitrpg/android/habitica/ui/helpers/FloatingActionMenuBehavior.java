@@ -123,7 +123,7 @@ public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
 			public void run() {
 				isAnimating = false;
                 FloatingActionMenu fab = (FloatingActionMenu)((ViewGroup) child).getChildAt(0);
-                if (!fab.isMenuHidden()) {
+                if (fab != null && !fab.isMenuHidden()) {
                     fab.hideMenu(false);
                 }
             }
@@ -141,8 +141,10 @@ public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
         Animation slideIn = AnimationUtils.loadAnimation(context, R.anim.fab_slide_in);
         slideIn.setDuration(FAB_ANIMATION_DURATION);
         slideIn.setFillAfter(true);
-        FloatingActionMenu fab = (FloatingActionMenu)((ViewGroup) view).getChildAt(0);
         view.startAnimation(slideIn);
-        fab.showMenu(false);
+        FloatingActionMenu fab = (FloatingActionMenu)((ViewGroup) view).getChildAt(0);
+        if(fab != null) {
+            fab.showMenu(false);
+        }
     }
 }

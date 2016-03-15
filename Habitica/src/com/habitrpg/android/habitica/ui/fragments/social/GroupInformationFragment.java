@@ -117,9 +117,7 @@ public class GroupInformationFragment extends Fragment {
             viewBinding.setGroup(group);
         }
 
-        if (questMemberView != null) {
-            updateQuestMember(group);
-        }
+        updateQuestMember(group);
 
         updateQuestProgress(group, quest);
 
