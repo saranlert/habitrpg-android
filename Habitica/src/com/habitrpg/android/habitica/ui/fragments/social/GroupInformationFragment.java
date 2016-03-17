@@ -87,9 +87,6 @@ public class GroupInformationFragment extends Fragment {
             viewBinding.setUser(user);
         }
 
-        if (group != null) {
-            setGroup(group);
-        }
 
         ButterKnife.bind(this, view);
         questMemberView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -103,6 +100,10 @@ public class GroupInformationFragment extends Fragment {
 
         bossHpBar = DataBindingUtil.bind(view.findViewById(R.id.bossHpBar));
         bossRageBar = DataBindingUtil.bind(view.findViewById(R.id.bossRageBar));
+
+        if (group != null) {
+            setGroup(group);
+        }
 
         return view;
     }
