@@ -8,8 +8,14 @@ import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.URLSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +59,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.util.List;
@@ -256,11 +263,14 @@ public class HabitItemRecyclerViewAdapter<THabitItem extends Task>
 
     // region ViewHolders
 
-    public abstract class ViewHolder<HabitItem extends Task> extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public abstract class ViewHolder<HabitItem extends Task> extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         protected android.content.res.Resources resources;
 
         public HabitItem Item;
+
+        @Bind(R.id.checkedTextView)
+        TextView titleTextView;
 
         @Bind(R.id.notesTextView)
         TextView notesTextView;
@@ -270,11 +280,13 @@ public class HabitItemRecyclerViewAdapter<THabitItem extends Task>
 
             itemView.setOnClickListener(this);
             itemView.setClickable(true);
-
-            itemView.setOnLongClickListener(this);
-            itemView.setLongClickable(true);
+            ViewGroup viewGroup = (ViewGroup)itemView;
 
             ButterKnife.bind(this, itemView);
+
+            //Re enable when we find a way to only react when a link is tapped.
+            //this.notesTextView.setMovementMethod(LinkMovementMethod.getInstance());
+            //this.titleTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             resources = itemView.getResources();
         }
@@ -297,15 +309,6 @@ public class HabitItemRecyclerViewAdapter<THabitItem extends Task>
             event.Task = Item;
 
             EventBus.getDefault().post(event);
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            TaskLongPressedEvent event = new TaskLongPressedEvent();
-            event.task = Item;
-
-            EventBus.getDefault().post(event);
-            return true;
         }
     }
 

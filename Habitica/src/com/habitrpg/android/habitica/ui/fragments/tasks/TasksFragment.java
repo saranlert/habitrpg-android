@@ -90,6 +90,21 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
     private ContentCache contentCache;
 
     private boolean displayingTaskForm;
+    private HashMap<String, Boolean> tagFilterMap = new HashMap<>();
+    private Debounce filterChangedHandler = new Debounce(1500, 1000) {
+        @Override
+        public void execute() {
+            ArrayList<String> tagList = new ArrayList<>();
+
+            for (Map.Entry<String, Boolean> f : tagFilterMap.entrySet()) {
+                if (f.getValue()) {
+                    tagList.add(f.getKey());
+                }
+            }
+            tagsHelper.setTags(tagList);
+            EventBus.getDefault().post(new FilterTasksByTagsCommand());
+        }
+    };
 
     public void setActivity(MainActivity activity) {
         super.setActivity(activity);
@@ -290,11 +305,8 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
                                                             }
 
                                                             callBack.GotAdditionalItems(buyableItems);
-
                                                         }
                                                     });
-
-
                                                 }
 
                                                 @Override
@@ -344,6 +356,10 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
         }
     }
 
+    // endregion
+
+    //region Events
+
     public void updateUserData(HabitRPGUser user) {
         super.updateUserData(user);
         if (refreshItem != null) {
@@ -388,10 +404,6 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
             startActivityForResult(intent, TASK_CREATED_RESULT);
         }
     }
-
-    // endregion
-
-    //region Events
 
     @Subscribe
     public void onEvent(final CreateTagCommand event) {
@@ -471,13 +483,12 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
 
     //endregion Events
     public void fillTagFilterDrawer(List<Tag> tagList) {
-        if (this.activity.filterDrawer != null) {
+        if (this.activity.filterDrawer != null && this.tagsHelper != null) {
             this.activity.filterDrawer.removeAllItems();
             this.activity.filterDrawer.addItems(
                     new SectionDrawerItem().withName("Filter by Tag"),
                     new EditTextDrawer()
             );
-
             for (Tag t : tagList) {
                 this.activity.filterDrawer.addItem(new SwitchDrawerItem()
                                 .withName(t.getName())
@@ -488,23 +499,6 @@ public class TasksFragment extends BaseMainFragment implements OnCheckedChangeLi
             }
         }
     }
-
-    private Debounce filterChangedHandler = new Debounce(1500, 1000) {
-        @Override
-        public void execute() {
-            ArrayList<String> tagList = new ArrayList<>();
-
-            for (Map.Entry<String, Boolean> f : tagFilterMap.entrySet()) {
-                if (f.getValue()) {
-                    tagList.add(f.getKey());
-                }
-            }
-            tagsHelper.setTags(tagList);
-            EventBus.getDefault().post(new FilterTasksByTagsCommand());
-        }
-    };
-
-    private HashMap<String, Boolean> tagFilterMap = new HashMap<>();
 
     /*
         Updates concerned tags.
