@@ -223,6 +223,7 @@ public class Task extends BaseModel {
      * @return whether or not the habit can be "upped"
      */
     public boolean getUp() {
+        if (up == null) { return false; }
         return up;
     }
     /**
@@ -236,6 +237,7 @@ public class Task extends BaseModel {
      * @return whether or not the habit can be "down"
      */
     public boolean getDown() {
+        if (down == null) { return false; }
         return down;
     }
     /**
@@ -288,13 +290,20 @@ public class Task extends BaseModel {
         return count;
     }
 
-    public String getFrequency() { return frequency; }
+    public String getFrequency() {
+        if (frequency == null) { return FREQUENCY_WEEKLY; }
+        return frequency; }
     public void setFrequency(String frequency) { this.frequency = frequency; }
 
-    public Integer getEveryX() { return everyX; }
+    public Integer getEveryX() {
+        if (everyX == null) { return 1; }
+        return everyX; }
     public void setEveryX(Integer everyX) { this.everyX = everyX; }
 
-    public Date getStartDate() { return startDate; }
+    public Date getStartDate() {
+        if (startDate == null) { return new Date(); }
+        return startDate;
+    }
     public void setStartDate(Date startDate) {this.startDate = startDate; }
 
     /**
@@ -302,6 +311,7 @@ public class Task extends BaseModel {
      * This array contains 7 values, one for each days, starting from monday.
      */
     public Days getRepeat() {
+        if (repeat == null) { return new Days(); }
         return repeat;
     }
     /**
@@ -315,6 +325,9 @@ public class Task extends BaseModel {
 	 * @return the streak
 	 */
     public int getStreak() {
+        if (streak == null) {
+            return 0;
+        }
         return streak;
     }
     /**
@@ -465,12 +478,6 @@ public class Task extends BaseModel {
         return R.color.best_10;
     }
 
-    public static Calendar startOfDay(Calendar calendar) {
-        return new GregorianCalendar(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH));
-    }
-
     public Boolean isDue(int offset) {
         if (this.getCompleted()) {
             return true;
@@ -479,14 +486,21 @@ public class Task extends BaseModel {
         Calendar today = new GregorianCalendar();
         today.add(Calendar.HOUR, -offset);
 
+        Calendar startDate = new GregorianCalendar();
+        Calendar startDateAtMidnight;
         if (this.getStartDate() != null) {
-            Calendar startDate = new GregorianCalendar();
             startDate.setTime(this.getStartDate());
-            Calendar startDateAtMidnight = startOfDay(startDate);
+            startDateAtMidnight = new GregorianCalendar(startDate.get(Calendar.YEAR),
+                    startDate.get(Calendar.MONTH),
+                    startDate.get(Calendar.DAY_OF_MONTH));
 
             if ( startDateAtMidnight.after(today) ) {
                 return false;
             }
+        } else {
+            startDateAtMidnight = new GregorianCalendar(startDate.get(Calendar.YEAR),
+                    startDate.get(Calendar.MONTH),
+                    startDate.get(Calendar.DAY_OF_MONTH));
         }
 
         if (this.getFrequency().equals(FREQUENCY_DAILY)) {
@@ -494,12 +508,8 @@ public class Task extends BaseModel {
                 return false;
             }
 
-            Calendar startDate = new GregorianCalendar();
-            if (this.getStartDate() != null) {
-                startDate.setTime(this.getStartDate());
-            }
             TimeUnit timeUnit = TimeUnit.DAYS;
-            long diffInMillies = startOfDay(startDate).getTimeInMillis() - today.getTimeInMillis();
+            long diffInMillies = startDateAtMidnight.getTimeInMillis() - today.getTimeInMillis();
             long daySinceStart = timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
             return (daySinceStart % this.getEveryX() == 0);
         } else {
